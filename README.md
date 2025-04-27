@@ -29,8 +29,8 @@ My Celengan hadir dengan tampilan modern dan warna-warna cerah yang membuat peng
 - **Hijau Segar** - Menandai progres dan pencapaian target
 
 <div align="center">
-  <img src="screenshots/home_screen1.png" width="250" alt="Home Screen">
-  <img src="screenshots/home_screen2.png" width="250" alt="Home Screen">
+  <img src="screenshots/home_screen1.jpg" width="250" alt="Home Screen">
+  <img src="screenshots/home_screen2.jpg" width="250" alt="Home Screen">
 </div>
 
 <div align="center">
