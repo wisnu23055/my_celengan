@@ -28,6 +28,15 @@ My Celengan hadir dengan tampilan modern dan warna-warna cerah yang membuat peng
 - **Aksen Oranye** - Memberikan sentuhan energik pada tombol aksi
 - **Hijau Segar** - Menandai progres dan pencapaian target
 
+<div align="center">
+  <img src="screenshots/home_screen1.png" width="250" alt="Home Screen">
+  <img src="screenshots/home_screen2.png" width="250" alt="Home Screen">
+</div>
+
+<div align="center">
+  <p><i>Tangkapan layar aplikasi My Celengan</i></p>
+</div>
+
 ## 🛠️ Teknologi yang Digunakan
 
 - **Flutter** - Framework UI multi-platform
