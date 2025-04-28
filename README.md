@@ -5,7 +5,7 @@
 
 ## 🏦 Tentang My Celengan
 
-**My Celengan** adalah aplikasi tabungan digital yang dirancang untuk membantu Anda mencapai tujuan finansial dengan cara yang menyenangkan dan mudah digunakan. Tetapkan target tabungan Anda, lacak kemajuan, dan kelola transaksi semuanya dalam satu aplikasi yang intuitif!
+**My Celengan** adalah aplikasi tabungan digital yang dirancang untuk membantu Anda mencapai tujuan keuangan yang sehat dengan cara yang menyenangkan dan mudah digunakan. Tetapkan target tabungan Anda, lacak kemajuan, dan kelola transaksi semuanya dalam satu aplikasi yang intuitif!
 
 Dengan tampilan yang menarik dan visual progress yang interaktif, mencapai target tabungan jadi lebih menyenangkan dan memotivasi. My Celengan membuat kebiasaan menabung jadi kegiatan yang mengasyikkan!
 
