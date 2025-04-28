@@ -26,7 +26,7 @@ My Celengan hadir dengan tampilan modern dan warna-warna cerah yang membuat peng
 
 - **Tema Biru Cerah** - Memberikan nuansa profesional namun tetap ramah pengguna
 - **Aksen Oranye** - Memberikan sentuhan energik pada tombol aksi
-- **Hijau Segar** - Menandai progres dan pencapaian target
+- **Biru dan Hijau Segar** - Menandai progres dan pencapaian target
 
 <div align="center">
   <img src="screenshots/home_screen1.jpg" width="250" alt="Home Screen">
