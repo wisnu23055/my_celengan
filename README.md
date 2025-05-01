@@ -69,7 +69,6 @@ My Celengan hadir dengan tampilan modern dan warna-warna cerah yang membuat peng
 
 ## 📝 Rencana Pengembangan Ke Depan
 
-- [ ] Integrasi dengan layanan cloud
 - [ ] Fitur ekspor/impor data
 - [ ] Mode gelap
 - [ ] Kustomisasi tema
