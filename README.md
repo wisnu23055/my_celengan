@@ -71,8 +71,6 @@ My Celengan hadir dengan tampilan modern dan warna-warna cerah yang membuat peng
 
 - [ ] Fitur ekspor/impor data
 - [ ] Mode gelap
-- [ ] Kustomisasi tema
-- [ ] Analisis tabungan dengan grafik
 - [ ] Multi-bahasa
 
 
