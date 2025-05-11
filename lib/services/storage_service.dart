@@ -91,7 +91,7 @@ class StorageService {
     }
   }
 
-  // Tambahkan listener untuk perubahan data
+  // Menambahkan listener untuk perubahan data
   static void addListener(Function(List<SavingsGoal>) listener) {
     _listeners.add(listener);
   }
