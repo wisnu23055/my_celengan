@@ -3,14 +3,15 @@ import 'package:my_celengan/models/saving_goals.dart';
 import 'package:my_celengan/screens/add_savings_screen.dart';
 import 'package:my_celengan/services/storage_service.dart';
 import 'package:intl/intl.dart';
+import 'package:my_celengan/utils/formatters.dart';
 
 class SavingsDetailScreen extends StatefulWidget {
   final SavingsGoal savingsGoal;
 
   const SavingsDetailScreen({
-    Key? key,
+    super.key,
     required this.savingsGoal,
-  }) : super(key: key);
+  });
 
   @override
   State<SavingsDetailScreen> createState() => _SavingsDetailScreenState();
@@ -43,12 +44,17 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor, // Menggunakan warna dari tema
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).shadowColor.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -96,9 +102,9 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
                       });
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
                         (states) {
-                          if (states.contains(MaterialState.selected)) {
+                          if (states.contains(WidgetState.selected)) {
                             return _isDeposit 
                                 ? const Color(0xFF4CAF50) 
                                 : const Color(0xFFFF5252);
@@ -116,11 +122,25 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
                     controller: _amountController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Nominal',
+                      labelText: 'Jumlah',
                       prefixText: '${_savingsGoal.currencyCode} ',
+                      filled: true,
+                      fillColor: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.grey[800] 
+                          : Colors.grey[100],
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white70 
+                            : null,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
+                    ),
+                    style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.white 
+                          : Colors.black,
                     ),
                   ),
                   
@@ -268,6 +288,141 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
     final remaining = _savingsGoal.targetAmount - _savingsGoal.currentAmount;
     final isCompleted = _savingsGoal.isCompleted;
     
+    Widget buildMilestoneProgressBar() {
+      return Container(
+        height: 16,
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Stack(
+          children: [
+            // Base progress bar
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            
+            // Actual progress
+            FractionallySizedBox(
+              widthFactor: _savingsGoal.progressPercentage.clamp(0.0, 1.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isCompleted 
+                      ? const Color(0xFF4CAF50) 
+                      : Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            
+            // Milestone markers
+            ..._savingsGoal.milestones.asMap().entries.map((entry) {
+              final index = entry.key;
+              final milestone = entry.value;
+              final isAchieved = _savingsGoal.achievedMilestones[index];
+              
+              return Positioned(
+                left: milestone * MediaQuery.of(context).size.width - 32, // Adjust position
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isAchieved 
+                        ? const Color(0xFF4CAF50)
+                        : Colors.grey[400],
+                    border: Border.all(
+                      color: Theme.of(context).cardColor,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${(milestone * 100).toInt()}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+    }
+
+    Widget buildMilestoneAchievements() {
+      final achievedMilestones = _savingsGoal.milestones
+          .asMap()
+          .entries
+          .where((entry) => _savingsGoal.achievedMilestones[entry.key])
+          .map((entry) => entry.value)
+          .toList();
+          
+      if (achievedMilestones.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      
+      return Container(
+        margin: const EdgeInsets.only(top: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.emoji_events,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Milestone Tercapai',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ...achievedMilestones.map((milestone) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      color: const Color(0xFF4CAF50),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Mencapai ${(milestone * 100).toInt()}% dari target',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(_savingsGoal.name),
@@ -293,11 +448,11 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor, // Instead of Colors.white
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Theme.of(context).shadowColor.withOpacity(0.1),
                   spreadRadius: 1,
                   blurRadius: 5,
                   offset: const Offset(0, 2),
@@ -345,7 +500,11 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
                   ],
                 ),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                
+                buildMilestoneProgressBar(),
+                
+                const SizedBox(height: 8),
                 
                 // Current Amount Row
                 Row(
@@ -359,7 +518,7 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
                       ),
                     ),
                     Text(
-                      '${_savingsGoal.currencyCode} ${_savingsGoal.currentAmount.toStringAsFixed(0)}',
+                      '${_savingsGoal.currencyCode} ${CurrencyFormatter.format(_savingsGoal.currentAmount)}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -383,7 +542,7 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
                       ),
                     ),
                     Text(
-                      '${_savingsGoal.currencyCode} ${_savingsGoal.targetAmount.toStringAsFixed(0)}',
+                      '${_savingsGoal.currencyCode} ${CurrencyFormatter.format(_savingsGoal.targetAmount)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -423,7 +582,9 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[800]  // warna gelap untuk tema gelap
+                        : Colors.grey[100], // warna terang untuk tema terang
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -460,6 +621,9 @@ class _SavingsDetailScreenState extends State<SavingsDetailScreen> {
                     ],
                   ),
                 ),
+                
+                if (_savingsGoal.achievedMilestones.contains(true))
+                  buildMilestoneAchievements(),
               ],
             ),
           ),
