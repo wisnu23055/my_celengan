@@ -3,6 +3,9 @@ import 'package:my_celengan/screens/add_savings_screen.dart';
 import 'package:my_celengan/screens/savings_detail_screen.dart';
 import 'package:my_celengan/models/saving_goals.dart';
 import 'package:my_celengan/services/storage_service.dart';
+import 'package:provider/provider.dart';
+import 'package:my_celengan/services/theme_service.dart';
+import 'package:my_celengan/utils/formatters.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     
-    // Tambahkan listener untuk perubahan data
+    // Menambahkan listener untuk perubahan data
     StorageService.addListener(_updateSavings);
     
     // Load data awal
@@ -114,8 +117,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeService>().isDarkMode;
+    
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text(
           'My Celengan',
@@ -125,6 +130,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
         ),
         actions: [
+          IconButton(
+            icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () {
+              context.read<ThemeService>().toggleTheme();
+            },
+            tooltip: isDarkMode ? 'Mode Terang' : 'Mode Gelap',
+          ),
           IconButton(
             icon: Icon(_sortNewestFirst ? Icons.arrow_downward : Icons.arrow_upward),
             onPressed: _toggleSort,
@@ -189,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ? 'Belum ada tabungan aktif.' 
                       : 'Belum ada tabungan tercapai.',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onBackground,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
                   ),
                 ),
@@ -243,12 +255,37 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 fontSize: 16,
                               ),
                             ),
-                            Text(
-                              '${saving.frequency} • ${saving.currencyCode} ${saving.depositAmount.toStringAsFixed(0)}',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                fontSize: 12,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  '${saving.frequency} • ${saving.currencyCode} ${saving.depositAmount.toStringAsFixed(0)}',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                // Tambahkan badge kategori
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: saving.categoryColor.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: saving.categoryColor.withOpacity(0.5),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    saving.category,
+                                    style: TextStyle(
+                                      color: saving.categoryColor,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -275,18 +312,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${saving.currencyCode} ${saving.currentAmount.toStringAsFixed(0)}',
+                        '${saving.currencyCode} ${CurrencyFormatter.format(saving.currentAmount)}',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       Text(
-                        '${saving.currencyCode} ${saving.targetAmount.toStringAsFixed(0)}',
+                        ' / ${CurrencyFormatter.format(saving.targetAmount)}',
                         style: TextStyle(
+                          fontSize: 14,
                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
