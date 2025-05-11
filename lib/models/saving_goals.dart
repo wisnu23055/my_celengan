@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 class SavingsGoal {
@@ -11,6 +12,14 @@ class SavingsGoal {
   DateTime createdAt;
   DateTime? completedAt;
   List<Transaction> transactions;
+  
+  // Tambahkan properti kategori
+  String category;
+  int categoryColorValue; // Menyimpan nilai Color sebagai int
+
+  // Tambahkan properti milestone
+  List<double> milestones;
+  List<bool> achievedMilestones;
 
   SavingsGoal({
     String? id,
@@ -23,16 +32,26 @@ class SavingsGoal {
     DateTime? createdAt,
     this.completedAt,
     List<Transaction>? transactions,
+    this.category = 'Umum', // Default kategori
+    this.categoryColorValue = 0xFF42A5F5, // Default warna biru
+    List<double>? milestones,
+    List<bool>? achievedMilestones,
   }) : 
     id = id ?? const Uuid().v4(),
     createdAt = createdAt ?? DateTime.now(),
-    transactions = transactions ?? [];
+    transactions = transactions ?? [],
+    milestones = milestones ?? [0.25, 0.5, 0.75],
+    achievedMilestones = achievedMilestones ?? [false, false, false];
+
+  // Getter untuk mengubah nilai int menjadi Color
+  Color get categoryColor => Color(categoryColorValue);
 
   double get progressPercentage => currentAmount / targetAmount;
 
   bool get isCompleted => currentAmount >= targetAmount;
 
   DateTime get estimatedCompletionDate {
+    // Kode tetap sama
     if (depositAmount <= 0) return DateTime.now().add(const Duration(days: 365));
     
     final remainingAmount = targetAmount - currentAmount;
@@ -51,6 +70,7 @@ class SavingsGoal {
   }
 
   void addDeposit(double amount, String note) {
+    // Kode tetap sama
     currentAmount += amount;
     transactions.add(
       Transaction(
@@ -64,9 +84,13 @@ class SavingsGoal {
     if (currentAmount > targetAmount) {
       currentAmount = targetAmount;
     }
+
+    // Periksa milestone setelah deposit
+    checkMilestones();
   }
 
   void withdraw(double amount, String note) {
+    // Kode tetap sama
     if (amount <= currentAmount) {
       currentAmount -= amount;
       transactions.add(
@@ -80,7 +104,17 @@ class SavingsGoal {
     }
   }
 
-  // Konversi ke Map untuk penyimpanan
+  // Metode untuk memeriksa milestone
+  void checkMilestones() {
+    final progress = progressPercentage;
+    for (int i = 0; i < milestones.length; i++) {
+      if (progress >= milestones[i]) {
+        achievedMilestones[i] = true;
+      }
+    }
+  }
+
+  // Update toMap untuk menambahkan kategori dan milestone
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -93,12 +127,16 @@ class SavingsGoal {
       'createdAt': createdAt.millisecondsSinceEpoch,
       'completedAt': completedAt?.millisecondsSinceEpoch,
       'transactions': transactions.map((t) => t.toMap()).toList(),
+      'category': category,
+      'categoryColorValue': categoryColorValue,
+      'milestones': milestones,
+      'achievedMilestones': achievedMilestones,
     };
   }
 
-  // Buat objek dari Map
+  // Update fromMap untuk memuat kategori dan milestone
   factory SavingsGoal.fromMap(Map<String, dynamic> map) {
-    // Pastikan field yang ada adalah benar dan nilai tidak null
+    // memastikan field yang ada adalah benar dan nilai tidak null
     final id = map['id'] as String? ?? const Uuid().v4();
     final name = map['name'] as String? ?? 'Tabungan';
     final targetAmount = (map['targetAmount'] as num?)?.toDouble() ?? 0.0;
@@ -106,7 +144,30 @@ class SavingsGoal {
     final frequency = map['frequency'] as String? ?? 'Harian';
     final depositAmount = (map['depositAmount'] as num?)?.toDouble() ?? 0.0;
     final currencyCode = map['currencyCode'] as String? ?? 'Rp';
+    final category = map['category'] as String? ?? 'Umum';
+    final categoryColorValue = map['categoryColorValue'] as int? ?? 0xFF42A5F5;
     
+    List<double> milestones = [0.25, 0.5, 0.75];
+    List<bool> achievedMilestones = [false, false, false];
+    
+    if (map['milestones'] != null) {
+      try {
+        milestones = (map['milestones'] as List).map((e) => (e as num).toDouble()).toList();
+      } catch (e) {
+        print('Error parsing milestones: $e');
+      }
+    }
+    
+    if (map['achievedMilestones'] != null) {
+      try {
+        achievedMilestones = (map['achievedMilestones'] as List).map((e) => e as bool).toList();
+      } catch (e) {
+        print('Error parsing achievedMilestones: $e');
+      }
+    }
+    
+    // Memastikan createdAt dan completedAt tidak null
+    // Jika null, set ke default
     DateTime? createdAt;
     if (map['createdAt'] != null) {
       try {
@@ -149,6 +210,10 @@ class SavingsGoal {
       createdAt: createdAt,
       completedAt: completedAt,
       transactions: transactions,
+      category: category,
+      categoryColorValue: categoryColorValue,
+      milestones: milestones,
+      achievedMilestones: achievedMilestones,
     );
   }
 }
