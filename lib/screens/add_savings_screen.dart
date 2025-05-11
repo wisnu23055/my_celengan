@@ -6,9 +6,9 @@ class AddSavingsScreen extends StatefulWidget {
   final SavingsGoal? existingSavingsGoal;
   
   const AddSavingsScreen({
-    Key? key, 
+    super.key, 
     this.existingSavingsGoal,
-  }) : super(key: key);
+  });
 
   @override
   State<AddSavingsScreen> createState() => _AddSavingsScreenState();
@@ -19,12 +19,33 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
   final TextEditingController _targetController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   
-  String _frequency = 'Harian'; // Default value
+  String _frequency = 'Harian';
   String _selectedCurrency = 'Rp';
   DateTime? _estimatedDate;
   
+  // Tambahkan variabel untuk kategori
+  String _selectedCategory = 'Umum';
+  
   final List<String> _frequencies = ['Harian', 'Mingguan', 'Bulanan'];
   final List<String> _currencies = ['Rp', 'USD', 'EUR', 'JPY', 'SGD', 'AUD', 'CNY', 'GBP'];
+  
+  // Tambahkan daftar kategori
+  final List<String> _categories = [
+    'Umum', 'Pendidikan', 'Liburan', 'Kendaraan', 
+    'Rumah', 'Gadget', 'Kesehatan', 'Lainnya'
+  ];
+  
+  // Map kategori ke warna
+  final Map<String, Color> _categoryColors = {
+    'Umum': const Color(0xFF42A5F5),      // Biru
+    'Pendidikan': const Color(0xFF26A69A), // Teal
+    'Liburan': const Color(0xFFFFCA28),    // Kuning
+    'Kendaraan': const Color(0xFF7E57C2),  // Ungu
+    'Rumah': const Color(0xFF66BB6A),      // Hijau
+    'Gadget': const Color(0xFFEC407A),     // Pink
+    'Kesehatan': const Color(0xFFEF5350),  // Merah
+    'Lainnya': const Color(0xFF8D6E63),    // Coklat
+  };
 
   @override
   void initState() {
@@ -37,6 +58,7 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
       _amountController.text = widget.existingSavingsGoal!.depositAmount.toString();
       _frequency = widget.existingSavingsGoal!.frequency;
       _selectedCurrency = widget.existingSavingsGoal!.currencyCode;
+      _selectedCategory = widget.existingSavingsGoal!.category;
       
       _calculateEstimatedDate();
     }
@@ -81,6 +103,7 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
     });
   }
 
+  // Update metode saveSavingsGoal untuk menyimpan kategori
   void _saveSavingsGoal() {
     final name = _nameController.text;
     final targetAmountText = _targetController.text;
@@ -109,7 +132,7 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
     }
     
     final savingsGoal = SavingsGoal(
-      id: widget.existingSavingsGoal?.id, // Gunakan ID yang ada jika edit
+      id: widget.existingSavingsGoal?.id,
       name: name,
       targetAmount: targetAmount,
       currentAmount: widget.existingSavingsGoal?.currentAmount ?? 0,
@@ -119,9 +142,62 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
       createdAt: widget.existingSavingsGoal?.createdAt,
       completedAt: widget.existingSavingsGoal?.completedAt,
       transactions: widget.existingSavingsGoal?.transactions,
+      category: _selectedCategory,
+      categoryColorValue: _categoryColors[_selectedCategory]?.value ?? 0xFF42A5F5,
     );
     
     Navigator.pop(context, savingsGoal);
+  }
+
+  // Tambahkan widget untuk memilih kategori
+  Widget _buildCategorySelector() {
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Kategori',
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _categories.map((category) {
+              final isSelected = _selectedCategory == category;
+              final color = _categoryColors[category] ?? Colors.blue;
+              
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? color : color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? color : color.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : color,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -157,10 +233,12 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Savings name field
+            // Informasi Tabungan
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Theme.of(context).brightness == Brightness.light 
+                    ? Colors.grey[100]
+                    : Colors.grey[800],
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(16),
@@ -179,14 +257,14 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
                       prefixIcon: Icon(Icons.list, color: Theme.of(context).colorScheme.primary),
                       hintText: 'Nama Tabungan',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).cardColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                        borderSide: BorderSide(color: Theme.of(context).dividerColor),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                        borderSide: BorderSide(color: Theme.of(context).dividerColor),
                       ),
                     ),
                   ),
@@ -206,15 +284,22 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
                                 color: Theme.of(context).colorScheme.primary),
                             hintText: 'Target Tabungan',
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey[800] 
+                                : Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(color: Theme.of(context).dividerColor),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(color: Theme.of(context).dividerColor),
                             ),
+                          ),
+                          style: TextStyle(
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.white 
+                                : Colors.black,
                           ),
                         ),
                       ),
@@ -225,14 +310,14 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
                           value: _selectedCurrency,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Theme.of(context).cardColor,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(color: Theme.of(context).dividerColor),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(color: Theme.of(context).dividerColor),
                             ),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                           ),
@@ -253,6 +338,9 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
                       ),
                     ],
                   ),
+                  
+                  // Tambahkan UI pemilihan kategori
+                  _buildCategorySelector(),
                 ],
               ),
             ),
@@ -262,25 +350,29 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
             // Deposit plan section
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Theme.of(context).brightness == Brightness.light 
+                    ? Colors.grey[100]
+                    : Colors.grey[800],
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Kode rencana pengisian tetap sama
                   const Text(
                     'Rencana Pengisian',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 16),
                   
-                  // Frequency selection tabs
+                  // Kode untuk frequency selection tabs dan lainnya tetap sama
+                  // ...
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(25),
-                      border: Border.all(color: Colors.grey[300]!),
+                      border: Border.all(color: Theme.of(context).dividerColor),
                     ),
                     child: Row(
                       children: _frequencies.map((frequency) {
@@ -303,7 +395,7 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
                                 child: Text(
                                   frequency,
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black87,
+                                    color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
                                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                   ),
                                 ),
@@ -330,14 +422,14 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
                             prefixIcon: Icon(Icons.attach_money, 
                                 color: Theme.of(context).colorScheme.primary),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Theme.of(context).cardColor,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(color: Theme.of(context).dividerColor),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(color: Theme.of(context).dividerColor),
                             ),
                           ),
                         ),
