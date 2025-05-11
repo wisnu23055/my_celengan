@@ -69,9 +69,9 @@ My Celengan hadir dengan tampilan modern dan warna-warna cerah yang membuat peng
 
 ## 📝 Rencana Pengembangan Ke Depan
 
-- [ ] Kategori tabungan
-- [ ] Mode gelap
-- [ ] Target milestone
+- [✅] Kategori tabungan
+- [✅] Mode gelap
+- [✅] Target milestone
 
 ---
 
