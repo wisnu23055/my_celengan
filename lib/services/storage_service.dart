@@ -7,8 +7,19 @@ class StorageService {
   static Box<String>? _savingsBox; // Ubah tipe ke String untuk JSON
   static final List<Function(List<SavingsGoal>)> _listeners = [];
 
+  // Tambahkan field untuk mocking
+  static bool _isTesting = false;
+  static List<SavingsGoal> _mockSavings = [];
+
   // Inisialisasi penyimpanan
-  static Future<void> initialize() async {
+  static Future<void> initialize({required bool testing}) async {
+    if (testing) {
+      _isTesting = true;
+      _mockSavings = []; // Reset mock data untuk testing
+      return;
+    }
+    
+    _isTesting = false;
     await Hive.initFlutter();
     _savingsBox = await Hive.openBox<String>(_savingsBoxName);
     
@@ -23,7 +34,19 @@ class StorageService {
 
   // Simpan tabungan baru
   static Future<void> saveSavingsGoal(SavingsGoal goal) async {
-    if (_savingsBox == null) await initialize();
+    if (_isTesting) {
+      // Cek apakah goal dengan ID yang sama sudah ada
+      final index = _mockSavings.indexWhere((g) => g.id == goal.id);
+      if (index >= 0) {
+        _mockSavings[index] = goal; // Update goal yang sudah ada
+      } else {
+        _mockSavings.add(goal); // Tambahkan goal baru
+      }
+      _notifyListeners();
+      return;
+    }
+    
+    if (_savingsBox == null) await initialize(testing: false);
     try {
       // Serialize to JSON string for better storage
       final jsonData = jsonEncode(goal.toMap());
@@ -42,7 +65,13 @@ class StorageService {
 
   // Hapus tabungan
   static Future<void> deleteSavingsGoal(String id) async {
-    if (_savingsBox == null) await initialize();
+    if (_isTesting) {
+      _mockSavings.removeWhere((g) => g.id == id);
+      _notifyListeners();
+      return;
+    }
+    
+    if (_savingsBox == null) await initialize(testing: false);
     try {
       await _savingsBox!.delete(id);
       print('Deleted goal: $id');
@@ -54,6 +83,10 @@ class StorageService {
 
   // Ambil semua tabungan
   static List<SavingsGoal> getAllSavingsGoals() {
+    if (_isTesting) {
+      return List.from(_mockSavings);
+    }
+    
     if (_savingsBox == null || _savingsBox!.isEmpty) return [];
     
     final goals = <SavingsGoal>[];
@@ -77,6 +110,11 @@ class StorageService {
 
   // Mendapatkan tabungan berdasarkan ID
   static SavingsGoal? getSavingsGoalById(String id) {
+    if (_isTesting) {
+      final found = _mockSavings.where((g) => g.id == id);
+      return found.isNotEmpty ? found.first : null;
+    }
+    
     if (_savingsBox == null) return null;
     
     try {
@@ -131,7 +169,7 @@ class StorageService {
   
   // Untuk debugging - hapus semua data
   static Future<void> clearAllData() async {
-    if (_savingsBox == null) await initialize();
+    if (_savingsBox == null) await initialize(testing: false);
     await _savingsBox!.clear();
     print('All data cleared');
     _notifyListeners();

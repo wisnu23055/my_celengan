@@ -11,7 +11,14 @@ class ThemeService with ChangeNotifier {
   bool get isDarkMode => _isDarkMode;
   
   // Inisialisasi
-  Future<void> initialize() async {
+  Future<void> initialize({required bool testing}) async {
+    if (testing) {
+      // Gunakan nilai default untuk testing tanpa menyentuh Hive
+      _isDarkMode = false;
+      return;
+    }
+    
+    // Hanya buka box Hive jika bukan testing
     _themeBox = await Hive.openBox<bool>(_themeBoxName);
     _loadTheme();
   }

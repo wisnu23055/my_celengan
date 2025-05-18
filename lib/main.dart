@@ -4,22 +4,24 @@ import 'package:my_celengan/services/storage_service.dart';
 import 'package:my_celengan/services/theme_service.dart';
 import 'package:provider/provider.dart';
 
-void main() async {
+// Tambahkan parameter untuk testing
+void main({bool testing = false}) async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    await StorageService.initialize();
+    await StorageService.initialize(testing: testing);
     
     final themeService = ThemeService();
-    await themeService.initialize();
+    await themeService.initialize(testing: testing);
     
     runApp(
-      ChangeNotifierProvider.value(
+      ChangeNotifierProvider<ThemeService>.value(
         value: themeService,
         child: const MyCelenganApp(),
       ),
     );
   } catch (e) {
+    print('Error initializing app: $e');
     runApp(const MyCelenganApp());
   }
 }
