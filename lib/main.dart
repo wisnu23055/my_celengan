@@ -90,7 +90,7 @@ class MyCelenganApp extends StatelessWidget {
         onSurface: Colors.white,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF1565C0),
+        backgroundColor: Color(0xFF1565C0), //Dark Blue
         foregroundColor: Colors.white,
       ),
       cardTheme: CardTheme(
@@ -100,7 +100,7 @@ class MyCelenganApp extends StatelessWidget {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFF7043),
+          backgroundColor: const Color(0xFFFF7043), // Darker orange
           foregroundColor: Colors.white,
           elevation: 3,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
